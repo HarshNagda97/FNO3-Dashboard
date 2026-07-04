@@ -189,7 +189,7 @@ styled_table = (
     display_table_final[final_columns]
     .style
     .apply(grey_out_low_presence, axis=1)
-    .applymap(color_signed_range, subset=SIGNED_RANGE_COLUMNS)
+    .map(color_signed_range, subset=SIGNED_RANGE_COLUMNS)   # changed from .applymap
     .format({col: "{:.1f}" for col in NUMERIC_COLUMNS}, na_rep="N/A")
     .set_properties(**{"text-align": "center"})
     .set_table_styles([{"selector": "th", "props": [("text-align", "center")]}])
@@ -259,7 +259,7 @@ if not compare_mode:
                     mode="lines", line=dict(shape="spline", smoothing=0.6, color="#7F77DD")
                 ))
                 fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10))
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
             else:
                 st.info("No price data for this range.")
 
@@ -272,7 +272,7 @@ if not compare_mode:
                     mode="lines", line=dict(shape="spline", smoothing=0.6, color="#1D9E75")
                 ))
                 fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10))
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
             else:
                 st.info("No Sum % data for this range.")
 
@@ -285,7 +285,7 @@ if not compare_mode:
                     mode="lines", line=dict(shape="spline", smoothing=0.6, color="#D85A30")
                 ))
                 fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10))
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
             else:
                 st.info("No client data for this range.")
 
@@ -336,7 +336,7 @@ else:
                     ))
                 fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10),
                                    legend=dict(orientation="h", yanchor="bottom", y=1.02))
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
             else:
                 st.info("No price data for this range.")
 
@@ -353,7 +353,7 @@ else:
                     ))
                 fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10),
                                    legend=dict(orientation="h", yanchor="bottom", y=1.02))
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
             else:
                 st.info("No Sum % data for this range.")
 
@@ -370,7 +370,7 @@ else:
                     ))
                 fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10),
                                    legend=dict(orientation="h", yanchor="bottom", y=1.02))
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
             else:
                 st.info("No client data for this range.")
 
