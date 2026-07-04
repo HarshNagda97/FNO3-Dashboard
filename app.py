@@ -140,26 +140,29 @@ display_table["Days Present"] = (
 )
 
 display_table = display_table.rename(columns={
-    "Price_Pct_Change": "Price % Change",
-    "Price_Range_Pct": "Price Range %",
+    "Price_Pct_Change": "Price% Change",
+    "Price_Range_Pct": "Price% Range",
     "Sum_Pct_Change": "Sum% Change",
-    "Sum_Pct_End": "Sum% End",
+    "Sum_Pct_End": "Sum% Current",
     "Sum_Pct_Range": "Sum% Range",
     "Clients_Change": "Clients Change",
-    "Clients_End": "Clients End",
+    "Clients_Range": "Clients Range",
 })
 
 final_columns = [
-    "Stock", "Price % Change", "Price Range %", "Sum% Change",
-    "Sum% End", "Sum% Range", "Clients Change", "Clients End", "Days Present"
+    "Stock", "Price% Change", "Price% Range", "Sum% Current",
+    "Sum% Change", "Sum% Range", "Clients Change", "Clients Range", "Days Present"
 ]
 display_table_final = display_table[final_columns + ["_low_presence"]]
 
-# Fill missing price data with a clear "N/A" label instead of a blank cell
-for col in ["Price % Change", "Price Range %"]:
-    display_table_final[col] = display_table_final[col].apply(
-        lambda v: "N/A" if pd.isna(v) else v
-    )
+# Columns that carry a +/- signed Range value (positive = trended up, negative = trended down)
+SIGNED_RANGE_COLUMNS = ["Price% Range", "Sum% Range"]
+
+# All numeric columns get formatted to exactly 1 decimal place
+NUMERIC_COLUMNS = [
+    "Price% Change", "Price% Range", "Sum% Current",
+    "Sum% Change", "Sum% Range", "Clients Change", "Clients Range"
+]
 
 
 def grey_out_low_presence(row):
@@ -170,11 +173,26 @@ def grey_out_low_presence(row):
     return [""] * len(row)
 
 
+def color_signed_range(val):
+    """Conditional formatting for signed Range columns: green if positive, red if negative."""
+    if pd.isna(val):
+        return ""
+    if val > 0:
+        return "color: #1D9E75; font-weight: 600"
+    if val < 0:
+        return "color: #D85A30; font-weight: 600"
+    return ""
+
+
 low_presence_flags = display_table_final["_low_presence"]
 styled_table = (
     display_table_final[final_columns]
     .style
     .apply(grey_out_low_presence, axis=1)
+    .applymap(color_signed_range, subset=SIGNED_RANGE_COLUMNS)
+    .format({col: "{:.1f}" for col in NUMERIC_COLUMNS}, na_rep="N/A")
+    .set_properties(**{"text-align": "center"})
+    .set_table_styles([{"selector": "th", "props": [("text-align", "center")]}])
 )
 
 st.dataframe(styled_table, width="stretch", hide_index=True)

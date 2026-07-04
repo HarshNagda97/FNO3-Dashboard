@@ -114,6 +114,7 @@ def download_one_date(session, date_obj):
         f"&date={date_str}&type=equity&mode=single"
     )
 
+    last_error = None
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             response = session.get(url, timeout=30)
