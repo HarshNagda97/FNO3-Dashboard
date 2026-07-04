@@ -58,12 +58,16 @@ def build_master_table(fno_df, price_df, start_date, end_date):
         # ---- Sum % metrics ----
         if not stock_fno.empty:
             sum_pct_series = stock_fno["Sum_Pct"]
-            row["Sum_Pct_Start"] = sum_pct_series.iloc[0]
-            row["Sum_Pct_End"] = sum_pct_series.iloc[-1]
-            row["Sum_Pct_Change"] = round(row["Sum_Pct_End"] - row["Sum_Pct_Start"], 2)
-            row["Sum_Pct_Max"] = sum_pct_series.max()
-            row["Sum_Pct_Min"] = sum_pct_series.min()
-            row["Sum_Pct_Range"] = round(row["Sum_Pct_Max"] - row["Sum_Pct_Min"], 2)
+            row["Sum_Pct_Start"] = round(sum_pct_series.iloc[0], 1)
+            row["Sum_Pct_End"] = round(sum_pct_series.iloc[-1], 1)
+            row["Sum_Pct_Change"] = round(row["Sum_Pct_End"] - row["Sum_Pct_Start"], 1)
+            sum_max = sum_pct_series.max()
+            sum_min = sum_pct_series.min()
+            row["Sum_Pct_Max"] = round(sum_max, 1)
+            row["Sum_Pct_Min"] = round(sum_min, 1)
+            # Range is signed: positive if value trended up (Start -> End), negative if it trended down
+            sum_sign = 1 if row["Sum_Pct_End"] >= row["Sum_Pct_Start"] else -1
+            row["Sum_Pct_Range"] = round(sum_sign * (sum_max - sum_min), 1)
         else:
             row.update({k: None for k in
                         ["Sum_Pct_Start", "Sum_Pct_End", "Sum_Pct_Change",
@@ -72,12 +76,16 @@ def build_master_table(fno_df, price_df, start_date, end_date):
         # ---- Num Clients metrics ----
         if not stock_fno.empty:
             clients_series = stock_fno["Num_Clients"]
-            row["Clients_Start"] = int(clients_series.iloc[0])
-            row["Clients_End"] = int(clients_series.iloc[-1])
-            row["Clients_Change"] = int(row["Clients_End"] - row["Clients_Start"])
-            row["Clients_Max"] = int(clients_series.max())
-            row["Clients_Min"] = int(clients_series.min())
-            row["Clients_Range"] = int(row["Clients_Max"] - row["Clients_Min"])
+            row["Clients_Start"] = round(float(clients_series.iloc[0]), 1)
+            row["Clients_End"] = round(float(clients_series.iloc[-1]), 1)
+            row["Clients_Change"] = round(row["Clients_End"] - row["Clients_Start"], 1)
+            c_max = clients_series.max()
+            c_min = clients_series.min()
+            row["Clients_Max"] = round(float(c_max), 1)
+            row["Clients_Min"] = round(float(c_min), 1)
+            # Range is signed: positive if Num_Clients trended up, negative if it trended down
+            clients_sign = 1 if row["Clients_End"] >= row["Clients_Start"] else -1
+            row["Clients_Range"] = round(clients_sign * (c_max - c_min), 1)
         else:
             row.update({k: None for k in
                         ["Clients_Start", "Clients_End", "Clients_Change",
@@ -90,10 +98,15 @@ def build_master_table(fno_df, price_df, start_date, end_date):
             p_end = price_series.iloc[-1]
             p_max = price_series.max()
             p_min = price_series.min()
-            row["Price_Start"] = round(p_start, 2)
-            row["Price_End"] = round(p_end, 2)
-            row["Price_Pct_Change"] = round(((p_end - p_start) / p_start) * 100, 2) if p_start else None
-            row["Price_Range_Pct"] = round(((p_max - p_min) / p_min) * 100, 2) if p_min else None
+            row["Price_Start"] = round(p_start, 1)
+            row["Price_End"] = round(p_end, 1)
+            row["Price_Pct_Change"] = round(((p_end - p_start) / p_start) * 100, 1) if p_start else None
+            if p_min:
+                # Range % is signed: positive if price trended up, negative if it trended down
+                price_sign = 1 if p_end >= p_start else -1
+                row["Price_Range_Pct"] = round(price_sign * ((p_max - p_min) / p_min) * 100, 1)
+            else:
+                row["Price_Range_Pct"] = None
         else:
             row.update({k: None for k in
                         ["Price_Start", "Price_End", "Price_Pct_Change", "Price_Range_Pct"]})
